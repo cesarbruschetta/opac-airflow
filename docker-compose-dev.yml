@@ -8,6 +8,14 @@ services:
         ports:
             - "8025:8025"
 
+    db_postgres:
+        image: postgres:latest
+        restart: always
+        environment:
+            - POSTGRES_PASSWORD=s3cr3t3
+            - POSTGRES_DB=opac_airflow_db
+            - POSTGRES_USER=opac_airflow
+
     opac-airflow:
         build: ./
         ports:
@@ -17,11 +25,14 @@ services:
             - ./airflow:/usr/local/airflow
             - ./fixtures:/usr/local/fixtures
         environment:
-          - AIRFLOW_HOME=/usr/local/airflow
-          - EMIAL_ON_FAILURE_RECIPIENTS=infra@scielo.org
-          - AIRFLOW__SMTP__SMTP_HOST=${AIRFLOW__SMTP__SMTP_HOST}
-          - AIRFLOW__SMTP__SMTP_USER=${AIRFLOW__SMTP__SMTP_USER}
-          - AIRFLOW__SMTP__SMTP_PASSWORD=${AIRFLOW__SMTP__SMTP_PASSWORD}
-          - AIRFLOW__SMTP__SMTP_MAIL_FROM=${AIRFLOW__SMTP__SMTP_MAIL_FROM}
-          - AIRFLOW__SMTP__SMTP_SSL=${AIRFLOW__SMTP__SMTP_SSL}
-          - AIRFLOW__SMTP__SMTP_PORT=${AIRFLOW__SMTP__SMTP_PORT}
+            - AIRFLOW_HOME=/usr/local/airflow
+            - EMIAL_ON_FAILURE_RECIPIENTS=infra@scielo.org
+            - AIRFLOW__SMTP__SMTP_MAIL_FROM=dev@scielo.org
+            - AIRFLOW__SMTP__SMTP_SSL=False
+            - AIRFLOW__SMTP__SMTP_STARTTLS=False
+            - AIRFLOW__SMTP__SMTP_HOST=mailhog
+            - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://opac_airflow:s3cr3t3@db_postgres/opac_airflow_db
+        depends_on:
+            - mailhog
+            - db_postgres

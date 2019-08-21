@@ -1,4 +1,4 @@
-FROM scieloorg/airflow:1.10.4
+FROM scieloorg/airflow:postgres
 
 ARG AIRFLOW_HOME=/usr/local/airflow
 
